@@ -1,17 +1,62 @@
 import Foundation
-// #Day1
+// #Day1 Part1&2
 // https://adventofcode.com/2023/day/1
 
 func sumCalibrationValues(lines: [String]) -> Int {
-    var sum = 0
+    var totalSum = 0
     for line in lines {
-        let digits = line.compactMap { Int(String($0)) }
-        if let firstDigit = digits.first, let lastDigit = digits.last {
-            let twoDigitNumber = firstDigit * 10 + lastDigit
-            sum += twoDigitNumber
+        totalSum += calculateLineValue(line: line)
+    }
+    return totalSum
+}
+
+func calculateLineValue(line: String) -> Int {
+    let firstDigit = findFirstDigit(in: line)
+    let lastDigit = findLastDigit(in: line)
+    return firstDigit * 10 + lastDigit
+}
+
+private let digitPatterns = [
+    "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+    "1", "2", "3", "4", "5", "6", "7", "8", "9"
+]
+
+private func findFirstDigit(in line: String) -> Int {
+    var earliestIndex = Int.max
+    var digitValue = 0
+    for (index, pattern) in digitPatterns.enumerated() {
+        if let foundIndex = line.firstOccurrenceIndex(of: pattern), foundIndex < earliestIndex {
+            earliestIndex = foundIndex
+            digitValue = index + 1
+            if foundIndex == 0 { break }
         }
     }
-    return sum
+    return digitValue > 9 ? digitValue - 9 : digitValue
+}
+
+private func findLastDigit(in line: String) -> Int {
+    var latestIndex = Int.min
+    var digitValue = 0
+    for (index, pattern) in digitPatterns.enumerated() {
+        if let foundIndex = line.lastOccurrenceIndex(of: pattern), foundIndex > latestIndex {
+            latestIndex = foundIndex
+            digitValue = index + 1
+            if foundIndex == line.count - pattern.count { break }
+        }
+    }
+    return digitValue > 9 ? digitValue - 9 : digitValue
+}
+
+extension String {
+    func firstOccurrenceIndex(of substring: String) -> Int? {
+        guard let range = self.range(of: substring) else { return nil }
+        return self.distance(from: self.startIndex, to: range.lowerBound)
+    }
+
+    func lastOccurrenceIndex(of substring: String) -> Int? {
+        guard let range = self.range(of: substring, options: .backwards) else { return nil }
+        return self.distance(from: self.startIndex, to: range.lowerBound)
+    }
 }
 
 func readFileContent(filename: String) -> String? {
