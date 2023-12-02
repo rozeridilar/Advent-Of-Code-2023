@@ -1,8 +1,7 @@
 import Foundation
 // #Day2
 // https://adventofcode.com/2023/day/2
-
-
+// Part1
 func sumOfPossibleGameIDs(lines: [String]) -> Int {
     let maxRed = 12, maxGreen = 13, maxBlue = 14
     var sumOfIDs = 0
@@ -39,7 +38,7 @@ func sumOfPossibleGameIDs(lines: [String]) -> Int {
     return sumOfIDs
 }
 
-
+// Part2
 func minSetOfCubesPowerSum(lines: [String]) -> Int {
     var powerSum = 0
 
