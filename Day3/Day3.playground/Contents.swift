@@ -36,25 +36,30 @@ struct Number: Hashable {
 // Main class for processing the schematic
 final class Day03 {
     var symbols: Set<Point>
+    var gears: Set<Point>
     var numbers: Set<Number>
 
     // Initialize with the input schematic as a string
     init(input: String) {
         symbols = Set<Point>()
+        gears = Set<Point>()
         numbers = Set<Number>()
 
         // Process each line of the input
         input.components(separatedBy: .newlines).enumerated().forEach { y, line in
-            self.processLine(line, y: y, symbols: &symbols, numbers: &numbers)
+            self.processLine(line, y: y, symbols: &symbols, gears: &gears, numbers: &numbers)
         }
     }
 
     // Processes a single line of the schematic
-    private func processLine(_ line: String, y: Int, symbols: inout Set<Point>, numbers: inout Set<Number>) {
+    private func processLine(_ line: String, y: Int, symbols: inout Set<Point>, gears: inout Set<Point>, numbers: inout Set<Number>) {
         for (x, ch) in line.enumerated() {
-            // Identify symbols
+            // Identify symbols and gears
             if !(ch.isNumber || ch == ".") {
                 symbols.insert(Point(x: x, y: y))
+                if ch == "*" {
+                    gears.insert(Point(x: x, y: y))
+                }
             }
         }
 
@@ -96,6 +101,17 @@ final class Day03 {
             .map { $0.value }
             .reduce(0, +)
     }
+
+    // Part 2: Sum of gear ratios
+    func part2() -> Int {
+        gears
+            .map { gear in
+                numbers.filter { $0.neighbors.contains(gear) }
+            }
+            .filter { $0.count == 2 }
+            .map { $0.map { $0.value }.reduce(1, *) }
+            .reduce(0, +)
+    }
 }
 
 // MARK: - Helpers
@@ -117,7 +133,9 @@ let filename = "Input"
 if let fileContent = readFileContent(filename: filename) {
     let day03 = Day03(input: fileContent)
     let resultPart1 = day03.part1()
+    let resultPart2 = day03.part2()
     print("Sum of part numbers (Part 1):", resultPart1)
+    print("Sum of the power of game sets (Part 2):", resultPart2)
 } else {
     fatalError("Could not read the file.")
 }
