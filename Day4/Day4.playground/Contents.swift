@@ -2,7 +2,7 @@ import Foundation
 
 // #Day4
 // https://adventofcode.com/2023/day/3
-// Searching Algo/Sets
+// Math Sets - Easy Search Algo
 
 private struct Card {
     let id: Int
@@ -40,6 +40,21 @@ final class Day04 {
     func part1() -> Int {
         cards.map(\.points).reduce(0, +)
     }
+
+    func part2() -> Int {
+        var copies = [Int](repeating: 1, count: cards.count + 1) // Start with 1 for each original card
+
+        for card in cards where card.matches > 0 {
+            let start = card.id + 1
+            let end = min(card.id + card.matches, cards.count)
+
+            for i in start...end {
+                copies[i] += copies[card.id]
+            }
+        }
+
+        return copies.reduce(0, +) - 1 // Subtract 1 for the initial 0 index which is not used
+    }
 }
 
 // MARK: - Helpers
@@ -68,7 +83,9 @@ let filename = "Input"
 if let fileContent = readFileContent(filename: filename) {
     let day04 = Day04(input: fileContent)
     let resultPart1 = day04.part1()
+    let resultPart2 = day04.part2()
     print("Matching card numbers total point (Part 1):", resultPart1)
+    print("Calculate total scratchcard (Part 2):", resultPart2)
 } else {
     fatalError("Could not read the file.")
 }
