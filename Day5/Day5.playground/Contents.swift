@@ -1,10 +1,10 @@
 import Foundation
 
-// #Day4
+// #Day5
 // https://adventofcode.com/2023/day/5
-// Mapping & Caching Efficiency
+// Mapping & comparison-based sorting algorithm
 
-// Solution:
+// Steps:
 // Start with the initial seed numbers.
 // For each seed number, follow the conversion maps in sequence (seed-to-soil, soil-to-fertilizer, etc.) to find the final location number.
 // If a seed number is within a range in the map, convert it using the map's rule. If not, it remains the same.
@@ -29,7 +29,41 @@ final class Day05 {
      }
 
     func part2() -> Int {
-        return 0
+        var ranges = almanac.seeds
+            .chunked(into: 2)
+            .compactMap { Range(from: $0[0], to: $0[0] + $0[1] - 1) }
+        // O(nˆ3)
+        for map in almanac.maps {
+            var newRanges = [Range]()
+            for r in ranges {
+                var range = r
+                for mapping in map.ranges {
+                    print(mapping)
+                    if range.from < mapping.from {
+                        newRanges.append(Range(from: range.from,
+                                               to: min(range.to, mapping.from - 1)))
+                        range = Range(from: mapping.from, to: range.to)
+                        if !range.isValid {
+                            break
+                        }
+                    }
+                    if range.from <= mapping.to {
+                        newRanges.append(Range(from: range.from + mapping.adjustment,
+                                               to: min(range.to, mapping.to) + mapping.adjustment))
+                        range = Range(from: mapping.to + 1, to: range.to)
+                        if !range.isValid {
+                            break
+                        }
+                    }
+                }
+                if range.isValid {
+                    newRanges.append(range)
+                }
+            }
+            ranges = newRanges
+        }
+
+        return ranges.min(by: { $0.from < $1.from })?.from ?? 0
     }
 }
 
@@ -37,7 +71,6 @@ final class Day05 {
 
 private struct Almanac {
     let seeds: [Int]
-
     let maps: [Map]
 
     init(_ lines: [String]) {
@@ -114,6 +147,12 @@ extension Array {
 
         return groups
     }
+
+    func chunked(into size: Int) -> [[Element]] {
+        stride(from: 0, to: self.count, by: size).map {
+            Array(self[$0..<Swift.min($0 + size, self.count)])
+        }
+    }
 }
 
 
@@ -135,8 +174,8 @@ if let fileContent = readFileContent(filename: filename) {
     let day05 = Day05(input: fileContent)
     let resultPart1 = day05.part1()
     let resultPart2 = day05.part2()
-    print("Matching card numbers total point (Part 1):", resultPart1)
-    print("Calculate total scratchcard (Part 2):", resultPart2)
+    print("findLowestLocationNumber (Part 1):", resultPart1)
+    print("findLowestLocationNumberForSeedRanges (Part 2):", resultPart2)
 } else {
     fatalError("Could not read the file.")
 }
