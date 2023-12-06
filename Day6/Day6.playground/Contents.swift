@@ -20,7 +20,6 @@ final class Day06 {
      init(input: String) {
          let regex = try! NSRegularExpression(pattern: "\\d+")
          let results = regex.matches(in: input, range: NSRange(input.startIndex..., in: input))
-         print(results)
          let numbers = results.map { Int(input[Range($0.range, in: input)!])! }
          let midPoint = numbers.count/2
 
@@ -32,19 +31,20 @@ final class Day06 {
      }
 
      func part1() -> Int {
-         var result = 1
          var races: [Race] = []
          for i in 0..<times.count {
              races.append(Race(time: times[i], distance: distances[i]))
          }
-         for race in races {
-             result *= race.totalWaysToWin()
 
-             print(race.totalWaysToWin())
-         }
+         return races.map { $0.totalWaysToWin() }.reduce(1, *)
+        }
 
-         return result
-     }
+       func part2() -> Int {
+           let time = Int(times.map { String($0) }.joined())!
+           let distance = Int(distances.map { String($0) }.joined())!
+           let race = Race(time: time, distance: distance)
+           return race.totalWaysToWin()
+       }
 }
 
 // MARK: - Models
@@ -86,7 +86,9 @@ let filename = "Input"
 if let fileContent = readFileContent(filename: filename) {
     let day06 = Day06(input: fileContent)
     let resultPart1 = day06.part1()
+    let resultPart2 = day06.part2()
     print("Times of total ways to win (Part 1):", resultPart1)
+    print("One game with all the ints, total ways to win (Part 2):", resultPart2)
 } else {
     fatalError("Could not read the file.")
 }
