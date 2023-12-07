@@ -24,6 +24,10 @@ final class Day07 {
         sumBids(hands.sorted(by: Hand.compareRank))
     }
 
+    func part2() -> Int {
+        sumBids(hands.sorted(by: Hand.compareJokerRank))
+    }
+
     private func sumBids(_ hands: [Hand]) -> Int {
         hands
             .enumerated()
@@ -70,6 +74,13 @@ private class Hand {
             _rank = getRank()
         }
         return _rank!
+    }
+
+    var jokerRank: HandRank {
+        if _jokerRank == nil {
+            _jokerRank = getJokerRank()
+        }
+        return _jokerRank!
     }
 
     private func getRank() -> HandRank {
@@ -172,6 +183,23 @@ extension Hand {
         }
         fatalError()
     }
+
+    private static let jokerMap: [Character: Int] = [
+        "A": 14, "K": 13, "Q": 12, "J": 1, "T": 10, "9": 9, "8": 8, "7": 7, "6": 6, "5": 5, "4": 4, "3": 3, "2": 2
+    ]
+
+    static func compareJokerRank (lhs: Hand, rhs: Hand) -> Bool {
+        if lhs.jokerRank != rhs.jokerRank {
+            return lhs.jokerRank < rhs.jokerRank
+        }
+
+        for (c1, c2) in zip(lhs.cards, rhs.cards) {
+            if c1 != c2 {
+                return jokerMap[c1]! < jokerMap[c2]!
+            }
+        }
+        fatalError()
+    }
 }
 
 // MARK: - Helpers
@@ -193,7 +221,8 @@ let filename = "Input"
 if let fileContent = readFileContent(filename: filename) {
     let day07 = Day07(input: fileContent)
     let resultPart1 = day07.part1()
-    print("Sum of total ranks (Part 1):", resultPart1)
+    print("Times of total ways to win (Part 1):", resultPart1)
+    print("One game with all the ints, total ways to win (Part 2):", resultPart2)
 } else {
     fatalError("Could not read the file.")
 }
