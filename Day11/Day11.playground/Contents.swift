@@ -19,6 +19,27 @@ final class Day11 {
         return distances.reduce(0, +)
     }
 
+    func part2() -> Int {
+        let image = input.components(separatedBy: .newlines).map(Array.init)
+        let (emptyRows, emptyColumns) = countEmptyRowsAndColumns(in: image)
+        let galaxyPairs = galaxyLocations(in: image).combinations(of: 2)
+        let expansionFactor = 1000000
+        let distances = galaxyPairs.map { $0[0].distanceWithExpansion(from: $0[0], to: $0[1], emptyRows: emptyRows, emptyColumns: emptyColumns, expansionFactor: expansionFactor) }
+
+        return distances.reduce(0, +)
+    }
+
+    func countEmptyRowsAndColumns(in image: [[Character]]) -> (rows: Int, columns: Int) {
+        let emptyRows = image.filter { $0.allSatisfy { $0 == "." } }.count
+
+        let columnCount = image.map { $0.count }.min() ?? 0
+        let emptyColumns = (0..<columnCount).filter { col in
+            image.allSatisfy { $0[col] == "." }
+        }.count
+
+        return (emptyRows, emptyColumns)
+    }
+
     func expandGalaxies(_ image: [[Character]], rotateAndExpand: Bool = true) -> [[Character]] {
         var result: [[Character]] = image[0].map { [$0] }
         for line in image.dropFirst() {
@@ -75,6 +96,17 @@ struct Coordinate: Hashable {
     func distance(to other: Coordinate) -> Int {
         return abs(x - other.x) + abs(y - other.y)
     }
+
+    func distanceWithExpansion(from: Coordinate, to: Coordinate, emptyRows: Int, emptyColumns: Int, expansionFactor: Int) -> Int {
+        let dx = abs(from.x - to.x)
+        let dy = abs(from.y - to.y)
+
+        // Calculate additional distance due to expanded rows and columns
+        let additionalX = dx > 0 ? emptyColumns * (expansionFactor - 1) : 0
+        let additionalY = dy > 0 ? emptyRows * (expansionFactor - 1) : 0
+
+        return dx + dy + additionalX + additionalY
+    }
 }
 
 // MARK: - Helpers
@@ -115,7 +147,9 @@ let filename = "Input"
 if let fileContent = readFileContent(filename: filename) {
     let day11 = Day11(input: fileContent)
     let resultPart1 = day11.part1()
+    let resultPart2 = day11.part2()
     print("Shortest path between every pair of galaxies (Part 1):", resultPart1)
+    print("Shortest path between every pair after expanding 1M (Part 2):", resultPart2)
 } else {
     fatalError("Could not read the file.")
 }
