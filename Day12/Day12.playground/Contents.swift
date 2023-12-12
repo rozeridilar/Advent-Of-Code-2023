@@ -2,7 +2,7 @@ import Foundation
 
 // #Day12
 // https://adventofcode.com/2023/day/12
-// Array Manipulation
+// Recursive-Memorization
 
 final class Day12 {
     private let springRows: [String]
@@ -14,6 +14,19 @@ final class Day12 {
     func part1() -> Int {
         let springEntries = springRows.map(SpringRow.init)
         return springEntries.reduce(0) { $0 + $1.countValidArrangements() }
+    }
+
+    func part2() -> Int {
+        let unfoldedSpringEntries = springRows.map { SpringRow(from: unfoldInputRow($0)) }
+        print(unfoldedSpringEntries)
+        return unfoldedSpringEntries.reduce(0) { $0 + $1.countValidArrangements() }
+    }
+
+    private func unfoldInputRow(_ row: String) -> String {
+        let components = row.components(separatedBy: CharacterSet(arrayLiteral: " ", ","))
+        let repeatedSprings = (1...5).map { _ in components[0] }.joined(separator: "?")
+        let repeatedGroups = (1...5).flatMap { _ in components[1...] }.joined(separator: ",")
+        return "\(repeatedSprings) \(repeatedGroups)"
     }
 }
 
@@ -33,6 +46,7 @@ struct SpringRow {
     }
 
     private func countArrangementsRecursively(for springArray: [Character], usingGroupSizes groupSizes: [Int], startingAt index: Int) -> Int {
+        print(springStates)
         guard let currentGroupSize = groupSizes.first else {
             return isArrangementValid(springArray: springArray) ? 1 : 0
         }
@@ -86,7 +100,9 @@ let filename = "Input"
 if let fileContent = readFileContent(filename: filename) {
     let challenge = Day12(input: fileContent)
     let resultPart1 = challenge.part1()
+    let resultPart2 = challenge.part2()
     print("Total valid arrangements (Part 1):", resultPart1)
+    print("New sum of possible arrangement counts (Part 2):", resultPart2)
 } else {
     fatalError("Could not read the file.")
 }
